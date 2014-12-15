@@ -4,8 +4,9 @@ from __future__ import division
 import math
 import numpy as np
 import pygame
+import sys
 
-from three_d.mathutil import deg_to_rad, normalize_projection_coords
+from three_d.mathutil import deg_to_rad, perspective_division
 from three_d.primitives.node import Node
 
 
@@ -43,27 +44,49 @@ class Viewport(object):
     def repaint(self):
         self.surface.fill(self.background_color)
         for obj in self.objects:
-            homo_ends = []
-            homo_starts = []
-            colors = []
-            for edge in obj.edges:
-                homo_starts.append(np.append(edge.start + obj.position, 1.0))
-                homo_ends.append(np.append(edge.end + obj.position, 1.0))
-                colors.append(edge.color)
+            homo_starts, homo_ends = \
+                Viewport.get_homogeneous_endpoints(obj.position, obj.edges)
+
+            if not homo_starts or not homo_ends:
+                continue
+
             proj_starts = np.matrix(homo_starts) * self.projection_matrix.T
             proj_ends = np.matrix(homo_ends) * self.projection_matrix.T
-            normalize_projection_coords(proj_starts)
-            normalize_projection_coords(proj_ends)
 
-            self.to_view_coords(proj_starts)
-            self.to_view_coords(proj_ends)
+            colors = (edge.color for edge in obj.edges)
+
+            perspective_division(proj_starts)
+            perspective_division(proj_ends)
+
+            proj_starts = self.to_view_coords(proj_starts)
+            proj_ends = self.to_view_coords(proj_ends)
             print proj_starts
             for start, end, color in zip(proj_starts, proj_ends, colors):
                 start = (start[0, 0], start[0, 1])
                 end = (end[0, 0], end[0, 1])
+                print end
                 pygame.draw.line(self.surface, color, start, end, 1)
+
+    @staticmethod
+    def get_homogeneous_endpoints(position, edges):
+        homo_ends = []
+        homo_starts = []
+        for edge in edges:
+            # exclude edges that are behind the camera
+            if (position + edge.start)[2] < 0 \
+               and (position + edge.end)[2] < 0:
+                continue
+            if (position + edge.start)[2] == 0 \
+               or (position + edge.end)[2] == 0:
+                continue
+            homo_starts.append(np.append(edge.start + position, 1.0))
+            homo_ends.append(np.append(edge.end + position, 1.0))
+        return homo_ends, homo_starts
 
     def to_view_coords(self, proj_mat):
         proj_mat *= self.height / 2
-        proj_mat[:, 1] += self.height / 2
         proj_mat[:, 0] += self.width / 2
+        proj_mat[:, 1] += self.height / 2
+        # proj_mat[:, 0] = np.clip(proj_mat[:, 0], 0, self.width)
+        # proj_mat[:, 1] = np.clip(proj_mat[:, 1], 0, self.height)
+        return proj_mat
