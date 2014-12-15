@@ -10,7 +10,6 @@ from three_d.mathutil import deg_to_rad, perspective_division
 from three_d.primitives.node import Node
 
 
-
 class Viewport(object):
     '''Represents a view of the 3-dimensional scene.
     '''
@@ -64,7 +63,6 @@ class Viewport(object):
             for start, end, color in zip(proj_starts, proj_ends, colors):
                 start = (start[0, 0], start[0, 1])
                 end = (end[0, 0], end[0, 1])
-                print end
                 pygame.draw.line(self.surface, color, start, end, 1)
 
     @staticmethod
