@@ -26,6 +26,6 @@ class ShapeReader(object):
                     edge.append('0xFFFFFF')
                 shape.append(Edge(np.array(list(edge[0]))), Edge(np.array(list(edge[1]))),
                              Edge(np.array(list(edge[2]))))
-                return shape
+            return shape
             
             
