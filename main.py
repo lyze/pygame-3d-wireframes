@@ -50,10 +50,15 @@ def main():
             if event.type == pygame.QUIT:
                 logging.info('Received QUIT event.')
                 sys.exit()
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                game.start_drag()
+            elif event.type == pygame.MOUSEBUTTONUP:
+                game.end_drag()
             else:
                 pass
         fps_clock.tick(fps)
         game.tick()
+        game.update_mouse_rel(*pygame.mouse.get_rel())
         pygame.display.update()
         if show_fps:
             fps_text = fps_font.render(fps_clock.get_fps(), False,
