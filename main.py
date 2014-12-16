@@ -2,16 +2,15 @@
 
 import argparse
 import logging
+import numpy as np
 import pygame
+import random
 import sys
 
 from game import Game
 from three_d.viewport import Viewport
 from shapes import Cube
-
-import numpy as np
-
-import random
+from shape_reader import ShapeReader
 
 def get_random_color():
     def random_intensity():
@@ -50,7 +49,15 @@ def main():
     parser.add_argument('--log-level', type=int, default=logging.INFO,
                         help='a value in [0, 50] in increments of 10, where 0 \
                         is for all messages, and 50 for only critical errors')
+    parser.add_argument('--input-file', '--input', type=str, default=None,
+                        help='the name of the file containing a description of \
+                        the meshes to draw')
     args = parser.parse_args()
+
+    if args.input_file is None:
+        playground = default_playground
+    else:
+        playground = [ShapeReader(args.input_file).process_file()]
 
     fps = args.fps
     show_fps = args.show_fps
@@ -63,7 +70,8 @@ def main():
 
     main_surface = pygame.display.get_surface()
     gameview = Viewport(main_surface, vertical_fov_deg=args.fov)
-    game = Game(gameview, objects=default_playground)
+
+    game = Game(gameview, objects=playground)
 
     pygame.display.flip()
 
