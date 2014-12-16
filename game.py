@@ -12,8 +12,9 @@ class Game(object):
     '''Manipulates the world (and its interactable objects) and the view.
     '''
 
-    def __init__(self, view):
+    def __init__(self, view, objects=[]):
         self.view = view
+        self.view.add_all_objects(objects)
         self.is_drag = False
 
     def tick(self):

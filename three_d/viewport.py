@@ -41,6 +41,9 @@ class Viewport(object):
     def add_object(self, obj):
         self.objects.append(obj)
 
+    def add_all_objects(self, objs):
+        self.objects.extend(objs)
+
     def repaint(self):
         self.surface.fill(self.background_color)
         for obj in self.objects:
@@ -85,18 +88,18 @@ class Viewport(object):
         return homo_ends, homo_starts
 
     def to_camera_coords(self, starts, ends):
+        # FIXME: Translation of camera position does not work
         zaxis = self.look_dir
         zaxis /= np.linalg.norm(zaxis)
-        xaxis = np.array(np.cross(self.up, zaxis))
+        xaxis = np.array(np.cross(zaxis, self.up))
         xaxis /= np.linalg.norm(xaxis)
-        yaxis = np.cross(zaxis, xaxis)
+        yaxis = np.cross(xaxis, zaxis)
         look_at = np.matrix([
             [xaxis[0], yaxis[0], zaxis[0], 0.0],
             [xaxis[1], yaxis[1], zaxis[1], 0.0],
             [xaxis[2], yaxis[2], zaxis[2], 0.0],
             [-np.dot(xaxis, self.eye), -np.dot(yaxis, self.eye),
              -np.dot(zaxis, self.eye), 1.0]])
-        print look_at
         result_starts = []
         result_ends = []
         for start, end in zip(starts, ends):
@@ -109,6 +112,8 @@ class Viewport(object):
             end_dotp = np.dot(self.look_dir, end[:3])
             if start_dotp < 0 and end_dotp < 0:
                 continue
+            # if start_dotp > 0 and end_dotp > 0:
+            #     continue
             if start_dotp == 0 or end_dotp == 0:
                 continue
             result_starts.append((start * look_at.T).getA())

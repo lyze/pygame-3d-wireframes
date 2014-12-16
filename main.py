@@ -7,9 +7,42 @@ import sys
 
 from game import Game
 from three_d.viewport import Viewport
+from shapes import Cube
+
+import numpy as np
+
+import random
+
+def get_random_color():
+    def random_intensity():
+        return int(np.clip(random.normalvariate(0xFF * 4 / 7, 0xFF / 3),
+                           0, 0xFF))
+    color = random_intensity()
+    color <<= 8
+    color |= random_intensity()
+    color <<= 8
+    color |= random_intensity()
+    return color
+
+default_playground = [Cube(np.array([-100, -100, 100]), side=50,
+                           color=get_random_color()),
+                      Cube(np.array([-50, -50, 300]), side=60,
+                           color=get_random_color()),
+                      Cube(np.array([0, 10, 200]), side=100,
+                           color=get_random_color()),
+                      Cube(np.array([40, 0, 1000]), side=200,
+                           color=get_random_color()),
+                      Cube(np.array([100, -50, 220]), side=50,
+                           color=get_random_color()),
+                      Cube(np.array([0, 0, 550]), side=500,
+                           color=get_random_color()),
+                      Cube(np.array([120, -30, 200]), side=100,
+                           color=get_random_color())
+]
+
 
 def main():
-    parser = argparse.ArgumentParser(description='Snake game!')
+    parser = argparse.ArgumentParser(description='Wireframe visualizer')
     parser.add_argument('--show-fps', nargs=None, type=bool, default=False,
                         help='whether to display an fps counter')
     parser.add_argument('--fps', type=int, default=60,
@@ -33,7 +66,7 @@ def main():
 
     main_surface = pygame.display.get_surface()
     gameview = Viewport(main_surface, vertical_fov_deg=args.fov)
-    game = Game(gameview)
+    game = Game(gameview, objects=default_playground)
 
     pygame.display.flip()
 
