@@ -8,6 +8,7 @@
 
 from three_d.primitives.edge import Edge
 import numpy as np
+import re
 
 
 class ShapeReader(object):
@@ -21,11 +22,14 @@ class ShapeReader(object):
             for line in f:
                 line = line.strip()
                 edge = line.split(',')
-                #if no color provided defaults it to black
+                if len(edge) == 3:
+                    pattern = "^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$"
+                    string = edge[2]
+                    if re.match(pattern, string) == None:
+                        edge[2] = ('0xFFFFFF')
                 if len(edge) == 2:
                     edge.append('0xFFFFFF')
                 shape.append(Edge(np.array(list(edge[0]))), Edge(np.array(list(edge[1]))),
                              Edge(np.array(list(edge[2]))))
             return shape
-            
             
