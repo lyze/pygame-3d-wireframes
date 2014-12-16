@@ -1,14 +1,22 @@
 '''Contains the viewport class'''
 from __future__ import division
 
+import logging
 import math
 import numpy as np
 import pygame
-import sys
+import time
 
 from three_d.mathutil import deg_to_rad, perspective_division
 from three_d.primitives.node import Node
 
+def timed(f):
+  def wrapper(*args):
+      now = time.clock()
+      result = f(*args)
+      logging.log(1, '{}: {}'.format(f.__name__, time.clock() - now))
+      return result
+  return wrapper
 
 class Viewport(object):
     '''Represents a view of the 3-dimensional scene.
@@ -44,6 +52,7 @@ class Viewport(object):
     def add_all_objects(self, objs):
         self.objects.extend(objs)
 
+    @timed
     def repaint(self):
         self.surface.fill(self.background_color)
         for obj in self.objects:

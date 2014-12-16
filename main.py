@@ -37,10 +37,7 @@ default_playground = [Cube(np.array([-100, -100, 100]), side=50,
                       Cube(np.array([0, 0, 550]), side=500,
                            color=get_random_color()),
                       Cube(np.array([120, -30, 200]), side=100,
-                           color=get_random_color())
-]
-
-
+                           color=get_random_color())]
 def main():
     parser = argparse.ArgumentParser(description='Wireframe visualizer')
     parser.add_argument('--show-fps', nargs=None, type=bool, default=False,
