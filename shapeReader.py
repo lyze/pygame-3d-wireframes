@@ -26,10 +26,9 @@ class ShapeReader(object):
                     pattern = "^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$"
                     string = edge[2]
                     if re.match(pattern, string) is None:
-                        edge[2] = ('0xFFFFFF')
+                        edge[2] = ('#FF0000')
                 if len(edge) == 2:
-                    edge.append('0xFFFFFF')
+                    edge.append('#FF0000')
                 shape.append(Edge(np.array(list(edge[0]))), Edge(np.array(list(edge[1]))),
                              Edge(np.array(list(edge[2]))))
             return shape
-            
