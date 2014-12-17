@@ -1,6 +1,7 @@
 '''Contains the viewport class'''
 from __future__ import division
 
+import itertools
 import logging
 import math
 import numpy as np
@@ -8,7 +9,6 @@ import pygame
 import time
 
 from three_d.mathutil import deg_to_rad, perspective_division
-from three_d.primitives.node import Node
 
 def timed(f):
   def wrapper(*args):
@@ -17,6 +17,7 @@ def timed(f):
       logging.log(1, '{}: {}'.format(f.__name__, time.clock() - now))
       return result
   return wrapper
+
 
 class Viewport(object):
     '''Represents a view of the 3-dimensional scene.
@@ -28,8 +29,8 @@ class Viewport(object):
         self.background_color = background_color
         self.width = surface.get_width()
         self.height = surface.get_height()
-        self.eye = np.array([0., 0., 0.]) #eye if eye is not None else np.array([0.0, 00.0, 0.0])
-        self.look_dir = np.array([0.0, 0.0, 1.0]) # at if at is not None else np.array([0.0, 0.0, 1.0])
+        self.eye = eye if eye is not None else np.array([0.0, 0.0, 0.0])
+        self.look_dir = at if at is not None else np.array([0.0, 0.0, 1.0])
         self.up = up if up is not None else np.array([0.0, 1.0, 0.0])
         self.zoom = zoom
         self.vertical_fov_deg = vertical_fov_deg
@@ -56,20 +57,21 @@ class Viewport(object):
     def repaint(self):
         self.surface.fill(self.background_color)
         for obj in self.objects:
-            homo_starts, homo_ends = \
-                Viewport.get_homogeneous_endpoints(obj.position, obj.edges)
 
-            if len(homo_starts) == 0 or len(homo_ends) == 0:
+            world_starts, world_ends = \
+                Viewport.get_world_endpoints(obj.position, obj.edges)
+
+            if len(world_starts) == 0 or len(world_ends) == 0:
                 continue
 
-            homo_starts, homo_ends = \
-                self.to_camera_coords(homo_starts, homo_ends)
+            camera_starts, camera_ends = \
+                self.to_camera_coords(world_starts, world_ends)
 
-            if len(homo_starts) == 0 or len(homo_ends) == 0:
+            if len(camera_starts) == 0 or len(camera_ends) == 0:
                 continue
 
-            proj_starts = homo_starts * self.projection_matrix.T
-            proj_ends = homo_ends * self.projection_matrix.T
+            proj_starts = camera_starts * self.projection_matrix.T
+            proj_ends = camera_ends * self.projection_matrix.T
 
             colors = (edge.color for edge in obj.edges)
 
@@ -84,17 +86,27 @@ class Viewport(object):
                 end = (end[0, 0], end[0, 1])
                 try:
                     pygame.draw.line(self.surface, color, start, end, 1)
-                except TypeError: # start or end too big
+                except TypeError:  # start or end too big
                     continue
 
     @staticmethod
-    def get_homogeneous_endpoints(position, edges):
-        homo_ends = []
-        homo_starts = []
-        for edge in edges:
-            homo_starts.append(np.append(edge.start + position, 1.0))
-            homo_ends.append(np.append(edge.end + position, 1.0))
-        return homo_ends, homo_starts
+    def get_world_endpoints(pos, edges):
+        '''Returns the edge endpoints in homogeneous world coordinates
+        '''
+        edge_starts = (coord
+                       for edge in edges
+                       for coord in itertools.chain(edge.start + pos, (1.0, )))
+        edge_ends = (coord
+                     for edge in edges
+                     for coord in itertools.chain(edge.end + pos, (1.0, )))
+
+        homo_starts = np.fromiter(edge_starts, np.float, count=4 * len(edges))
+        homo_ends = np.fromiter(edge_ends, np.float, count=4 * len(edges))
+
+        homo_starts = homo_starts.reshape((len(edges), 4))
+        homo_ends = homo_ends.reshape((len(edges), 4))
+
+        return homo_starts, homo_ends
 
     def to_camera_coords(self, starts, ends):
         # FIXME: Translation of camera position does not work
@@ -104,35 +116,52 @@ class Viewport(object):
         xaxis /= np.linalg.norm(xaxis)
         yaxis = np.cross(xaxis, zaxis)
         look_at = np.matrix([
-            [xaxis[0], yaxis[0], zaxis[0], 0.0],
-            [xaxis[1], yaxis[1], zaxis[1], 0.0],
-            [xaxis[2], yaxis[2], zaxis[2], 0.0],
-            [-np.dot(xaxis, self.eye), -np.dot(yaxis, self.eye),
-             -np.dot(zaxis, self.eye), 1.0]])
+            [xaxis[0], xaxis[1], xaxis[2], -np.dot(xaxis, self.eye)],
+            [yaxis[0], yaxis[1], yaxis[2], -np.dot(yaxis, self.eye)],
+            [zaxis[0], zaxis[1], zaxis[2], -np.dot(zaxis, self.eye)],
+            [0.0,      0.0,      0.0,      1.0]])
         result_starts = []
         result_ends = []
         for start, end in zip(starts, ends):
-            # transformed_start = (start * look_at.T).getA()
-            # transformed_end = (end * look_at.T).getA()
-            # exclude edges that are behind the camera
-            # start_dotp = np.dot(self.look_dir, transformed_start[0, :3])
-            # end_dotp = np.dot(self.look_dir, transformed_end[0, :3])
             start_dotp = np.dot(self.look_dir, start[:3])
             end_dotp = np.dot(self.look_dir, end[:3])
             if start_dotp < 0 and end_dotp < 0:
                 continue
-            # if start_dotp > 0 and end_dotp > 0:
-            #     continue
             if start_dotp == 0 or end_dotp == 0:
                 continue
-            result_starts.append((start * look_at.T).getA())
-            result_ends.append((end * look_at.T).getA())
+            result_starts.append((look_at
+                                  * np.matrix(start, copy=False).T).getA1())
+            result_ends.append((look_at * np.matrix(end, copy=False).T).getA1())
         return result_starts, result_ends
 
     def to_view_coords(self, proj_mat):
         proj_mat *= self.height / 2
         proj_mat[:, 0] += self.width / 2
         proj_mat[:, 1] += self.height / 2
-        # proj_mat[:, 0] = np.clip(proj_mat[:, 0], 0, self.width)
-        # proj_mat[:, 1] = np.clip(proj_mat[:, 1], 0, self.height)
         return proj_mat
+
+    def rotate_x(self, theta):
+        rot_x = np.matrix([[1, 0,                  0],
+                           [0, math.cos(theta), -math.sin(theta)],
+                           [0, math.sin(theta), math.cos(theta)]])
+
+        self.look_dir = (rot_x * np.matrix(self.look_dir).T).getA1()
+
+    def rotate_y(self, theta):
+        rot_y = np.matrix([[math.cos(theta),  0, math.sin(theta)],
+                           [0,                  1, 0],
+                           [-math.sin(theta), 0, math.cos(theta)]])
+
+        self.look_dir = (rot_y * np.matrix(self.look_dir).T).getA1()
+
+    def translate_z(self, dz):
+        self.eye[2] += dz
+
+    def translate_x(self, dx):
+        self.eye[0] += dx
+
+    def translate_y(self, dy):
+        self.eye[1] += dy
+
+    def translate(self, vect):
+        self.eye += vect

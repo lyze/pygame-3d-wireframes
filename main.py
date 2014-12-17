@@ -82,21 +82,49 @@ def main():
     if show_fps:
         fps_font = pygame.font.SysFont(None, 10)
 
+    pygame.mouse.set_visible(False)
+    pygame.event.set_grab(True)
+
+    is_mouse_focused = True
+
     logging.info('Entering main game loop...')
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 logging.info('Received QUIT event.')
                 sys.exit()
-            elif event.type == pygame.MOUSEBUTTONDOWN:
-                game.start_drag()
-            elif event.type == pygame.MOUSEBUTTONUP:
-                game.end_drag()
+            elif event.type == pygame.MOUSEMOTION:
+                game.move_camera(*pygame.mouse.get_rel())
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    pygame.event.set_grab(not is_mouse_focused)
+                    pygame.mouse.set_visible(is_mouse_focused)
+                    is_mouse_focused = not is_mouse_focused
+                elif event.key == pygame.K_w:
+                    game.begin_move_forward()
+                elif event.key == pygame.K_a:
+                    game.begin_move_left()
+                elif event.key == pygame.K_d:
+                    game.begin_move_right()
+                elif event.key == pygame.K_s:
+                    game.begin_move_backward()
+                else:
+                    pass
+            elif event.type == pygame.KEYUP:
+                if event.key == pygame.K_w:
+                    game.end_move_forward()
+                elif event.key == pygame.K_a:
+                    game.end_move_left()
+                elif event.key == pygame.K_d:
+                    game.end_move_right()
+                elif event.key == pygame.K_s:
+                    game.end_move_backward()
+                else:
+                    pass
             else:
                 pass
         fps_clock.tick(fps)
         game.tick()
-        game.update_mouse_rel(*pygame.mouse.get_rel())
         pygame.display.update()
         if show_fps:
             fps_text = fps_font.render(fps_clock.get_fps(), False,
