@@ -82,10 +82,7 @@ def main():
     if show_fps:
         fps_font = pygame.font.SysFont(None, 10)
 
-    pygame.mouse.set_visible(False)
-    pygame.event.set_grab(True)
-
-    is_mouse_focused = True
+    is_mouse_focused = False
 
     logging.info('Entering main game loop...')
     while True:
@@ -96,11 +93,7 @@ def main():
             elif event.type == pygame.MOUSEMOTION:
                 game.move_camera(*pygame.mouse.get_rel())
             elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
-                    pygame.event.set_grab(not is_mouse_focused)
-                    pygame.mouse.set_visible(is_mouse_focused)
-                    is_mouse_focused = not is_mouse_focused
-                elif event.key == pygame.K_w:
+                if event.key == pygame.K_w:
                     game.begin_move_forward()
                 elif event.key == pygame.K_a:
                     game.begin_move_left()
@@ -111,7 +104,11 @@ def main():
                 else:
                     pass
             elif event.type == pygame.KEYUP:
-                if event.key == pygame.K_w:
+                if event.key == pygame.K_ESCAPE:
+                    pygame.event.set_grab(not is_mouse_focused)
+                    pygame.mouse.set_visible(is_mouse_focused)
+                    is_mouse_focused = not is_mouse_focused
+                elif event.key == pygame.K_w:
                     game.end_move_forward()
                 elif event.key == pygame.K_a:
                     game.end_move_left()

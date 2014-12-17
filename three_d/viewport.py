@@ -24,13 +24,15 @@ class Viewport(object):
     '''
 
     def __init__(self, surface, background_color=0x000000, eye=None,
-                 at=None, up=None, zoom=1, vertical_fov_deg=70, objects=[]):
+                 look_dir=None, up=None, zoom=1.0, vertical_fov_deg=70,
+                 objects=[]):
         self.surface = surface
         self.background_color = background_color
         self.width = surface.get_width()
         self.height = surface.get_height()
         self.eye = eye if eye is not None else np.array([0.0, 0.0, 0.0])
-        self.look_dir = at if at is not None else np.array([0.0, 0.0, 1.0])
+        self.look_dir = look_dir if look_dir is not None \
+                        else np.array([0.0, 0.0, 1.0])
         self.up = up if up is not None else np.array([0.0, 1.0, 0.0])
         self.up /= np.linalg.norm(self.up)
         self.zoom = zoom
@@ -43,10 +45,10 @@ class Viewport(object):
                                       / self.zoom)
         aspect_ratio = self.width / self.height
 
-        return np.matrix([[focal_length / aspect_ratio, 0, 0, 0],
-                          [0, focal_length, 0, 0],
-                          [0, 0, -1, -2],
-                          [0, 0, -1, 0]])
+        return np.matrix([[focal_length / aspect_ratio, 0.0, 0.0, 0.0],
+                          [0.0, focal_length, 0.0, 0.0],
+                          [0.0, 0.0, -1.0, -2.0],
+                          [0.0, 0.0, -1.0, 0.0]])
 
     def add_object(self, obj):
         self.objects.append(obj)
@@ -110,7 +112,6 @@ class Viewport(object):
         return homo_starts, homo_ends
 
     def to_camera_coords(self, starts, ends):
-        # FIXME: Translation of camera position does not work
         zaxis = self.get_look_dir()
         xaxis = self.get_strafe_dir()
         yaxis = self.up
@@ -140,7 +141,7 @@ class Viewport(object):
         return proj_mat
 
     def rotate_x(self, theta):
-        rot_x = np.matrix([[1, 0,                  0],
+        rot_x = np.matrix([[1, 0,               0],
                            [0, math.cos(theta), -math.sin(theta)],
                            [0, math.sin(theta), math.cos(theta)]])
 
@@ -153,15 +154,6 @@ class Viewport(object):
                            [-math.sin(theta), 0, math.cos(theta)]])
 
         self.look_dir = (rot_y * np.matrix(self.look_dir, copy=False).T).getA1()
-
-    def translate_z(self, dz):
-        self.eye[2] += dz
-
-    def translate_x(self, dx):
-        self.eye[0] += dx
-
-    def translate_y(self, dy):
-        self.eye[1] += dy
 
     def translate(self, vect):
         self.eye += vect

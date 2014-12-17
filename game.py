@@ -1,12 +1,6 @@
 '''Contains the controller.
 '''
-
-import math
 import numpy as np
-
-from shapes import Cube
-
-
 
 class Game(object):
     '''Manipulates the world (and its interactable objects) and the view.
@@ -24,7 +18,6 @@ class Game(object):
         self.move_distance = 2
         self.rotation_scale_factor = 0.003
 
-
     def tick(self):
         # movement
         move_dir = np.zeros(3)
@@ -33,13 +26,14 @@ class Game(object):
         if self.is_moving_backward:
             move_dir -= self.view.get_look_dir()
         if self.is_moving_left:
-            move_dir -= self.view.get_strafe_dir()
-        if self.is_moving_right:
             move_dir += self.view.get_strafe_dir()
-        move_dir /= np.linalg.norm(move_dir)
-        self.view.translate(self.move_distance * move_dir)
+        if self.is_moving_right:
+            move_dir -= self.view.get_strafe_dir()
+        if self.is_moving_forward or self.is_moving_backward \
+           or self.is_moving_left or self.is_moving_right:
+            move_dir /= np.linalg.norm(move_dir)
+            self.view.translate(self.move_distance * move_dir)
         self.view.repaint()
-
 
     def move_camera(self, dx, dy):
         theta_x = dy * self.rotation_scale_factor
