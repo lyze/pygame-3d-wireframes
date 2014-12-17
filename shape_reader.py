@@ -8,7 +8,7 @@
 import numpy as np
 import re
 
-from three_d.primitives.edge import Edge
+from three_d.primitives import Edge
 from edge_collection import EdgeCollection
 
 class ShapeReader(object):

@@ -2,7 +2,7 @@
 '''
 import numpy as np
 
-from three_d.primitives.edge import Edge
+from three_d.primitives import Edge
 
 from game_object import GameObject
 

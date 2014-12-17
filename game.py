@@ -26,19 +26,22 @@ class Game(object):
 
 
     def tick(self):
-        self.view.repaint()
+        # movement
+        move_dir = np.zeros(3)
         if self.is_moving_forward:
-            self.view.translate_z(self.move_distance)
+            move_dir += self.view.get_look_dir()
         if self.is_moving_backward:
-            self.view.translate_z(-self.move_distance)
+            move_dir -= self.view.get_look_dir()
         if self.is_moving_left:
-            self.view.translate_x(-self.move_distance)
+            move_dir -= self.view.get_strafe_dir()
         if self.is_moving_right:
-            self.view.translate_x(self.move_distance)
+            move_dir += self.view.get_strafe_dir()
+        move_dir /= np.linalg.norm(move_dir)
+        self.view.translate(self.move_distance * move_dir)
+        self.view.repaint()
 
 
     def move_camera(self, dx, dy):
-
         theta_x = dy * self.rotation_scale_factor
         theta_y = dx * self.rotation_scale_factor
 

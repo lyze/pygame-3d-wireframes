@@ -32,6 +32,7 @@ class Viewport(object):
         self.eye = eye if eye is not None else np.array([0.0, 0.0, 0.0])
         self.look_dir = at if at is not None else np.array([0.0, 0.0, 1.0])
         self.up = up if up is not None else np.array([0.0, 1.0, 0.0])
+        self.up /= np.linalg.norm(self.up)
         self.zoom = zoom
         self.vertical_fov_deg = vertical_fov_deg
         self.objects = objects
@@ -110,11 +111,9 @@ class Viewport(object):
 
     def to_camera_coords(self, starts, ends):
         # FIXME: Translation of camera position does not work
-        zaxis = self.look_dir
-        zaxis /= np.linalg.norm(zaxis)
-        xaxis = np.array(np.cross(zaxis, self.up))
-        xaxis /= np.linalg.norm(xaxis)
-        yaxis = np.cross(xaxis, zaxis)
+        zaxis = self.get_look_dir()
+        xaxis = self.get_strafe_dir()
+        yaxis = self.up
         look_at = np.matrix([
             [xaxis[0], xaxis[1], xaxis[2], -np.dot(xaxis, self.eye)],
             [yaxis[0], yaxis[1], yaxis[2], -np.dot(yaxis, self.eye)],
@@ -145,14 +144,15 @@ class Viewport(object):
                            [0, math.cos(theta), -math.sin(theta)],
                            [0, math.sin(theta), math.cos(theta)]])
 
-        self.look_dir = (rot_x * np.matrix(self.look_dir).T).getA1()
+        self.look_dir = (rot_x * np.matrix(self.look_dir, copy=False).T).getA1()
+        self.up = (rot_x * np.matrix(self.up, copy=False).T).getA1()
 
     def rotate_y(self, theta):
         rot_y = np.matrix([[math.cos(theta),  0, math.sin(theta)],
                            [0,                  1, 0],
                            [-math.sin(theta), 0, math.cos(theta)]])
 
-        self.look_dir = (rot_y * np.matrix(self.look_dir).T).getA1()
+        self.look_dir = (rot_y * np.matrix(self.look_dir, copy=False).T).getA1()
 
     def translate_z(self, dz):
         self.eye[2] += dz
@@ -165,3 +165,15 @@ class Viewport(object):
 
     def translate(self, vect):
         self.eye += vect
+
+    def get_look_dir(self):
+        '''Returns the unit vector representing the direction that the camera is
+        facing
+        '''
+        return self.look_dir / np.linalg.norm(self.look_dir)
+
+    def get_strafe_dir(self):
+        '''Returns the unit vector representing the direction of a sideways move
+        to the right.
+        '''
+        return np.cross(self.get_look_dir(), self.up)

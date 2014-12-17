@@ -1,6 +1,6 @@
 '''Contains the Model class'''
 
-from three_d.primitives.entity_3d import Entity3D
+from three_d.primitives import Entity3D
 
 class Model(Entity3D):
     '''Represents a wireframe mesh in its own coordinate system'''
