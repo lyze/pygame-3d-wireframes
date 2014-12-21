@@ -80,8 +80,8 @@ class Viewport(object):
 
     @abstractmethod
     def update_projection_matrix(self):
-        """Updates the projection matrix of this viewport. Should be called
-        when the view parameters are changed.
+        """Updates the projection matrix (`self._projection_matrix`) of this viewport.
+        Should be called when the view parameters are changed.
         """
         pass
 
