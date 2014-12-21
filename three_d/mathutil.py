@@ -48,37 +48,56 @@ def clip_point(xmin, ymin, xmax, ymax, x, y):
     return xmin <= x <= xmax and ymin <= y <= ymax
 
 
-def clip_t(denom, num, tE_tL):
-    """Computes a new value of `tE` or `tL` for an interior intersection of a
-    two-dimensional line segment and an edge. Adapted from James D. Foley, ed.,
-    __Computer Graphics: Principles and Practice__ (Reading, Mass. [u.a.]:
-    Addison-Wesley, 1998), 122-123.
+# def clip_t(denom, num, tE_tL):
+#     """Computes a new value of `tE` or `tL` for an interior intersection of a
+#     two-dimensional line segment and an edge. Adapted from James D. Foley, ed.,
+#     __Computer Graphics: Principles and Practice__ (Reading, Mass. [u.a.]:
+#     Addison-Wesley, 1998), 122-123.
 
-    Parameters
-    ----------
-    denom, num : float
-    tE_tL : array (size 2) of float
+#     Parameters
+#     ----------
+#     denom, num : float
+#     tE_tL : array (size 2) of float
 
-    Returns
-    -------
-    is_updated : bool
+#     Returns
+#     -------
+#     is_updated : bool
+#     """
+#     if denom > 0:
+#         t = num / denom
+#         if t > tE_tL[1]:
+#             return False
+#         if t > tE_tL[0]:
+#             tE_tL[0] = t
+#     elif denom < 0:
+#         t = num / denom
+#         if t < tE_tL[0]:
+#             return False
+#         tE_tL[1] = t
+#     elif num > 0:
+#         return False
+#     return True
 
-    """
-    if denom > 0:
-        t = num / denom
-        if t > tE_tL[1]:
-            return False
-        if t > tE_tL[0]:
-            tE_tL[0] = t
-    elif denom < 0:
-        t = num / denom
-        if t < tE_tL[0]:
-            return False
-        tE_tL[1] = t
-    elif num > 0:
-        return False
-    return True
-
+def clip_t(p, q, t0_t1):
+    accept = True
+    if p < 0:
+        if q < 0:
+            r = q / p
+            if r > t0_t1[1]:
+                accept = False
+            elif r > t0_t1[0]:
+                t0_t1[0] = r
+    elif p > 0:
+        if q < p:
+            r = q / p
+            if r < t0_t1[0]:
+                accept = False
+            elif r < t0_t1[1]:
+                t0_t1[1] = r
+    else: # p == 0
+        if q < 0:
+            accept = False
+    return accept
 
 def clip_2d_liang_barsky(xmin, ymin, xmax, ymax, x0, y0, x1, y1):
     """Clips the two-dimensional line segment by the algorithm of Liang and
@@ -187,33 +206,32 @@ def clip_4d_liang_barsky(zmin, zmax, p0, p1):
     """
     x0, y0, z0, w0 = p0
     x1, y1, z1, w1 = p1
-    print p0, p1
     # test for a trivial reject
     if (x0 > z0 and x1 > z1) or (y0 > z0 and y1 > z1) or \
        (x0 < -z0 and x1 < -z1) or (y0 < -z0 and y1 < -z1) or \
        (z0 < zmin) and (z1 < zmin) or (z0 > zmax and z1 > zmax):
         return False
-    tmin_tmax = np.array((0.0, 1.0))
+    t0_t1 = np.array((0.0, 1.0))
     dx = x1 - x0
     dw = w1 - w0
-    if clip_t(-dx - dw, x0 + w0, tmin_tmax): # left
-        if clip_t(dx - dw, w0 - x0, tmin_tmax): # right
+    if clip_t(-dx - dw, x0 + w0, t0_t1): # left
+        if clip_t(dx - dw, w0 - x0, t0_t1): # right
             dy = y1 - y0
-            if clip_t(-dy - dw, y0 + w0, tmin_tmax): # bottom
-                if clip_t(dy - dw, w0 - y0, tmin_tmax): # top
+            if clip_t(-dy - dw, y0 + w0, t0_t1): # bottom
+                if clip_t(dy - dw, w0 - y0, t0_t1): # top
                     dz = z1 - z0
-                    if clip_t(-dz, z0, tmin_tmax): # front
-                        if clip_t(dz - dw, w0 - z0, tmin_tmax): # back
-                            tmin, tmax = tmin_tmax
-                            if tmax < 1:
-                                p1[0] = x0 + tmax * dx
-                                p1[1] = y0 + tmax * dy
-                                p1[2] = z0 + tmax * dz
-                                p1[3] = w0 + tmax * dw
-                            if tmin > 0:
-                                p0[0] += tmin * dx
-                                p0[1] += tmin * dy
-                                p0[2] += tmin * dz
-                                p0[3] += tmin * dw
+                    if clip_t(-dz, z0, t0_t1): # front
+                        if clip_t(dz - dw, w0 - z0, t0_t1): # back
+                            t0, t1 = t0_t1
+                            if t1 < 1:
+                                p1[0] = x0 + t1 * dx
+                                p1[1] = y0 + t1 * dy
+                                p1[2] = z0 + t1 * dz
+                                p1[3] = w0 + t1 * dw
+                            if t0 > 0:
+                                p0[0] += t0 * dx
+                                p0[1] += t0 * dy
+                                p0[2] += t0 * dz
+                                p0[3] += t0 * dw
                             return True
     return False

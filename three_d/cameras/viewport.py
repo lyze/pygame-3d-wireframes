@@ -1,7 +1,6 @@
 """Contains the base class for all three-dimensional viewports."""
 from __future__ import division
 
-import itertools
 import logging
 import math
 import numpy as np
@@ -10,6 +9,7 @@ import time
 
 from abc import ABCMeta, abstractmethod
 from three_d.mathutil import perspective_division, clip_4d_liang_barsky
+from itertools import chain, izip
 
 def timed(f):
   def wrapper(*args):
@@ -109,14 +109,16 @@ class Viewport(object):
             proj_ends = transform * world_ends.T
             proj_starts = proj_starts.T
             proj_ends = proj_ends.T
-            print "world to camera"
-            print world_to_camera
-            print "projection matrix"
-            print self.projection_matrix
-            print "world start points"
-            print world_starts
-            print "projected start points"
-            print proj_starts
+
+            # visible = (clip_4d_liang_barsky(self.near, self.far,
+            #                                 start.getA1(),
+            #                                 end.getA1())
+            #            for start, end in izip(proj_starts, proj_ends))
+            # visible = np.fromiter(visible, dtype=bool)
+            # proj_starts = proj_starts[visible]
+            # proj_ends = proj_ends[visible]
+            # colors = (edge.color
+            #           for i, edge in enumerate(obj.edges) if visible[i])
 
             colors = (edge.color for edge in obj.edges)
 
@@ -126,8 +128,7 @@ class Viewport(object):
             view_starts = self.to_view_coords(proj_starts)
             view_ends = self.to_view_coords(proj_ends)
 
-            print "to draw:"
-            for start, end, color in zip(view_starts, view_ends, colors):
+            for start, end, color in izip(view_starts, view_ends, colors):
                 print start, end
                 pygame.draw.line(self.surface, color, start, end, 1)
 
@@ -148,10 +149,10 @@ class Viewport(object):
         """
         edge_starts = (coord
                        for edge in edges
-                       for coord in itertools.chain(edge.start + pos, (1.0, )))
+                       for coord in chain(edge.start + pos, (1.0, )))
         edge_ends = (coord
                      for edge in edges
-                     for coord in itertools.chain(edge.end + pos, (1.0, )))
+                     for coord in chain(edge.end + pos, (1.0, )))
 
         homo_starts = np.fromiter(edge_starts, np.float, count=4 * len(edges))
         homo_ends = np.fromiter(edge_ends, np.float, count=4 * len(edges))

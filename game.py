@@ -29,11 +29,12 @@ class Game(object):
             move_dir += self.view.strafe_dir
         if self.is_moving_right:
             move_dir -= self.view.strafe_dir
-        if self.is_moving_forward or self.is_moving_backward \
-           or self.is_moving_left or self.is_moving_right:
-            move_dir /= np.linalg.norm(move_dir)
+        dir_length = np.linalg.norm(move_dir)
+        if dir_length \
+           and (self.is_moving_forward or self.is_moving_backward
+                or self.is_moving_left or self.is_moving_right):
+            move_dir /= dir_length
             self.view.translate(self.move_distance * move_dir)
-            self.view.update_projection_matrix()
         self.view.repaint()
 
     def move_camera(self, dx, dy):

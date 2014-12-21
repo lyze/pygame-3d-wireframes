@@ -38,8 +38,8 @@ default_playground = [Cube(np.array([-100, -100, 100]), side=50,
                       Cube(np.array([120, -30, 200]), side=100,
                            color=get_random_color())]
 
-# default_playground = [Cube(np.array([0, 0, 200]), side=55,
-#                            color=get_random_color())]
+default_playground = [Cube(np.array([0, 0, 200]), side=55,
+                           color=get_random_color())]
 
 
 def main():
