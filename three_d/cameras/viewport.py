@@ -47,13 +47,13 @@ class Viewport(object):
     height
     background_color : int
     eye : 3-D numpy array
-    center_offset
-    near
-    far
+    center_offset : tuple of float
+    near : float
+    far : float
     look_dir
     up_dir
     strafe_dir
-    zoom
+    zoom : float
     projection_matrix
     objects : iterable of things to draw
     """
@@ -65,22 +65,23 @@ class Viewport(object):
         self._surface = surface
         self.background_color = background_color
         self.eye = eye if eye is not None else np.array([0.0, 0.0, 0.0])
-        self._center_offset = center_offset
-        self._near = near
-        self._far = far
+        self.center_offset = center_offset
+        self.near = near
+        self.far = far
         self._look_dir = look_dir or np.array([0.0, 0.0, 1.0])
         self._look_dir /= np.linalg.norm(self._look_dir)
         self._up_dir = up_dir or np.array([0.0, 1.0, 0.0])
         self._up_dir /= np.linalg.norm(self._up_dir)
         self._strafe_dir = np.cross(self.look_dir, self.up_dir)
-        self._zoom = zoom
+        self.zoom = zoom
         self.objects = objects or []
         self._projection_matrix = None
         self.update_projection_matrix()
 
     @abstractmethod
     def update_projection_matrix(self):
-        """Updates the projection matrix of this viewport.
+        """Updates the projection matrix of this viewport. Should be called
+        when the view parameters are changed.
         """
         pass
 
@@ -236,25 +237,6 @@ class Viewport(object):
         return self.surface.get_height()
 
     @property
-    def center_offset(self):
-        """The offset of the center of the view, given by a tuple representing a
-        translation in the xy-plane.
-        """
-        return self._center_offset
-
-    @property
-    def near(self):
-        """The distance to the near clipping plane.
-        """
-        return self._near
-
-    @property
-    def far(self):
-        """The distance to the far clipping plane.
-        """
-        return self._far
-
-    @property
     def up_dir(self):
         """The unit vector representing the direction of "up".
         """
@@ -271,12 +253,6 @@ class Viewport(object):
         """The unit vector representing the direction of "strafe" movements.
         """
         return self._strafe_dir
-
-    @property
-    def zoom(self):
-        """The amount of zoom to apply to the view.
-        """
-        return self._zoom
 
     @property
     def projection_matrix(self):

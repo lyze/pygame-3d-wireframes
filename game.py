@@ -33,6 +33,7 @@ class Game(object):
            or self.is_moving_left or self.is_moving_right:
             move_dir /= np.linalg.norm(move_dir)
             self.view.translate(self.move_distance * move_dir)
+            self.view.update_projection_matrix()
         self.view.repaint()
 
     def move_camera(self, dx, dy):
