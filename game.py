@@ -22,13 +22,13 @@ class Game(object):
         # movement
         move_dir = np.zeros(3)
         if self.is_moving_forward:
-            move_dir += self.view.get_look_dir()
+            move_dir += self.view.look_dir
         if self.is_moving_backward:
-            move_dir -= self.view.get_look_dir()
+            move_dir -= self.view.look_dir
         if self.is_moving_left:
-            move_dir += self.view.get_strafe_dir()
+            move_dir += self.view.strafe_dir
         if self.is_moving_right:
-            move_dir -= self.view.get_strafe_dir()
+            move_dir -= self.view.strafe_dir
         if self.is_moving_forward or self.is_moving_backward \
            or self.is_moving_left or self.is_moving_right:
             move_dir /= np.linalg.norm(move_dir)
