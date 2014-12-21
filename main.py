@@ -9,6 +9,7 @@ import sys
 
 from game import Game
 from three_d.cameras.orthographic import OrthographicViewport
+from three_d.cameras.perspective import PerspectiveViewport
 from shapes import Cube
 from shape_reader import ShapeReader
 
@@ -38,8 +39,8 @@ default_playground = [Cube(np.array([-100, -100, 100]), side=50,
                       Cube(np.array([120, -30, 200]), side=100,
                            color=get_random_color())]
 
-default_playground = [Cube(np.array([0, 0, 200]), side=55,
-                           color=get_random_color())]
+# default_playground = [Cube(np.array([0, 0, 200]), side=55,
+#                            color=get_random_color())]
 
 
 def main():
@@ -74,7 +75,7 @@ def main():
     pygame.display.set_mode((800, 600))
 
     main_surface = pygame.display.get_surface()
-    gameview = OrthographicViewport(main_surface)
+    gameview = PerspectiveViewport(main_surface)
 
     game = Game(gameview, objects=playground)
 
