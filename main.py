@@ -8,7 +8,7 @@ import random
 import sys
 
 from game import Game
-from three_d.viewport import Viewport
+from three_d.cameras.orthographic import OrthographicViewport
 from shapes import Cube
 from shape_reader import ShapeReader
 
@@ -37,6 +37,11 @@ default_playground = [Cube(np.array([-100, -100, 100]), side=50,
                            color=get_random_color()),
                       Cube(np.array([120, -30, 200]), side=100,
                            color=get_random_color())]
+
+default_playground = [Cube(np.array([0, 0, 200]), side=55,
+                           color=get_random_color())]
+
+
 def main():
     parser = argparse.ArgumentParser(description='Wireframe visualizer')
     parser.add_argument('--show-fps', nargs=None, type=bool, default=False,
@@ -69,7 +74,7 @@ def main():
     pygame.display.set_mode((800, 600))
 
     main_surface = pygame.display.get_surface()
-    gameview = Viewport(main_surface, vertical_fov_deg=args.fov)
+    gameview = OrthographicViewport(main_surface)
 
     game = Game(gameview, objects=playground)
 
@@ -82,7 +87,9 @@ def main():
     if show_fps:
         fps_font = pygame.font.SysFont(None, 10)
 
-    is_mouse_focused = False
+    is_mouse_focused = True
+    pygame.event.set_grab(True)
+    pygame.mouse.set_visible(False)
 
     logging.info('Entering main game loop...')
     while True:

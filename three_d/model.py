@@ -1,10 +1,18 @@
-'''Contains the Model class'''
+"""Contains the Model class"""
 
 from three_d.primitives import Entity3D
 
 class Model(Entity3D):
-    '''Represents a wireframe mesh in its own coordinate system'''
+    """Represents a wireframe mesh in its own coordinate system.
 
+    Parameters
+    ----------
+    edges : iterable of edges, optional
+
+    Attributes
+    ----------
+    edges : iterable of edges
+    """
     def __init__(self, edges=[]):
         self.edges = edges
 

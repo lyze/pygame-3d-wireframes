@@ -39,8 +39,10 @@ class Game(object):
         theta_x = dy * self.rotation_scale_factor
         theta_y = dx * self.rotation_scale_factor
 
-        self.view.rotate_x(theta_x)
-        self.view.rotate_y(theta_y)
+        if theta_x:
+            self.view.rotate_x(theta_x)
+        if theta_y:
+            self.view.rotate_y(theta_y)
 
     def begin_move_forward(self):
         self.is_moving_forward = True
