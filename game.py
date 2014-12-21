@@ -26,9 +26,9 @@ class Game(object):
         if self.is_moving_backward:
             move_dir -= self.view.look_dir
         if self.is_moving_left:
-            move_dir += self.view.strafe_dir
-        if self.is_moving_right:
             move_dir -= self.view.strafe_dir
+        if self.is_moving_right:
+            move_dir += self.view.strafe_dir
         dir_length = np.linalg.norm(move_dir)
         if dir_length \
            and (self.is_moving_forward or self.is_moving_backward
@@ -38,8 +38,8 @@ class Game(object):
         self.view.repaint()
 
     def move_camera(self, dx, dy):
-        theta_x = dy * self.rotation_scale_factor
-        theta_y = dx * self.rotation_scale_factor
+        theta_x = -dy * self.rotation_scale_factor
+        theta_y = -dx * self.rotation_scale_factor
 
         if theta_x:
             self.view.rotate_x(theta_x)

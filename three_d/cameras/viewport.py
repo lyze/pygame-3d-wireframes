@@ -129,7 +129,6 @@ class Viewport(object):
             view_ends = self.to_view_coords(proj_ends)
 
             for start, end, color in izip(view_starts, view_ends, colors):
-                print start, end
                 pygame.draw.line(self.surface, color, start, end, 1)
 
     @staticmethod
@@ -199,7 +198,7 @@ class Viewport(object):
                            [0.0, math.sin(theta), math.cos(theta)]])
 
         self._up_dir = (self.up_dir * rot_x.T).getA1()
-        self._look_dir = np.cross(self.strafe_dir, self.up_dir)
+        self._look_dir = np.cross(self.up_dir, self.strafe_dir)
 
     def rotate_y(self, theta):
         rot_y = np.matrix([[math.cos(theta),  0.0, math.sin(theta)],
@@ -207,14 +206,14 @@ class Viewport(object):
                            [-math.sin(theta), 0.0, math.cos(theta)]])
 
         self._look_dir = (self.look_dir * rot_y.T).getA1()
-        self._strafe_dir = np.cross(self.up_dir, self.look_dir)
+        self._strafe_dir = np.cross(self.look_dir, self.up_dir)
 
     def rotate_z(self, theta):
         rot_z = np.matrix([[math.cos(theta), -math.sin(theta), 0.0],
                            [math.sin(theta), math.cos(theta),  0.0],
                            [0.0,             0.0,              1.0]])
         self._strafe_dir = (self.strafe_dir * rot_z.T).getA1()
-        self._up_dir = np.cross(self.look_dir, self.strafe_dir)
+        self._up_dir = np.cross(self.strafe_dir, self.look_dir)
 
     def translate(self, vect):
         self.eye += vect
