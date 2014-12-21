@@ -80,8 +80,8 @@ class Viewport(object):
 
     @abstractmethod
     def update_projection_matrix(self):
-        """Updates the projection matrix (`self._projection_matrix`) of this viewport.
-        Should be called when the view parameters are changed.
+        """Updates the projection matrix (`self._projection_matrix`) of this
+        viewport. Should be called when the view parameters are changed.
         """
         pass
 
@@ -100,7 +100,7 @@ class Viewport(object):
 
         for obj in self.objects:
             world_starts, world_ends = \
-                Viewport.get_world_endpoints(obj.position, obj.edges)
+                Viewport.get_world_endpoints(obj.edges, obj.position, obj.scale)
 
             if len(world_starts) == 0 or len(world_ends) == 0:
                 continue
@@ -132,13 +132,14 @@ class Viewport(object):
                 pygame.draw.line(self.surface, color, start, end, 1)
 
     @staticmethod
-    def get_world_endpoints(pos, edges):
+    def get_world_endpoints(edges, pos, scale):
         """Returns the edge endpoints in homogeneous world coordinates
 
         Parameters
         ----------
-        pos : numpy array
         edges : iterable of Edge
+        pos : numpy array
+        scale : float
 
         Returns
         -------
@@ -148,10 +149,10 @@ class Viewport(object):
         """
         edge_starts = (coord
                        for edge in edges
-                       for coord in chain(edge.start + pos, (1.0, )))
+                       for coord in chain(scale * edge.start + pos, (1.0, )))
         edge_ends = (coord
                      for edge in edges
-                     for coord in chain(edge.end + pos, (1.0, )))
+                     for coord in chain(scale * edge.end + pos, (1.0, )))
 
         homo_starts = np.fromiter(edge_starts, np.float, count=4 * len(edges))
         homo_ends = np.fromiter(edge_ends, np.float, count=4 * len(edges))
