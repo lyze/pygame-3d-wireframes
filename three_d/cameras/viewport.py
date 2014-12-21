@@ -30,8 +30,9 @@ class Viewport(object):
     background_color : int, optional
     eye : numpy array, optional
         Defaults to (0, 0, 0).
-    center_offset : tuple of float
-        Defaults to (0, 0)
+    center_offset : tuple of float, optional
+        The offset (xy-plane translation) to apply to the center of the view.
+        Default is no offset, which is (0, 0).
     look_dir : numpy array, optional
         Defaults to (0, 0, 1).
     up : numpy array, optional
@@ -46,7 +47,7 @@ class Viewport(object):
     height
     background_color : int
     eye : 3-D numpy array
-    center_offset : tuple of float
+    center_offset
     near
     far
     look_dir
@@ -95,6 +96,7 @@ class Viewport(object):
 
         world_to_camera = self.get_world_to_camera_matrix()
         transform = self.projection_matrix * world_to_camera
+
         for obj in self.objects:
             world_starts, world_ends = \
                 Viewport.get_world_endpoints(obj.position, obj.edges)
@@ -123,6 +125,7 @@ class Viewport(object):
             view_starts = self.to_view_coords(proj_starts)
             view_ends = self.to_view_coords(proj_ends)
 
+            print "to draw:"
             for start, end, color in zip(view_starts, view_ends, colors):
                 print start, end
                 pygame.draw.line(self.surface, color, start, end, 1)
