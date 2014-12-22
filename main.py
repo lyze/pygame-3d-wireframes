@@ -77,7 +77,7 @@ def main():
     main_surface = pygame.display.get_surface()
     gameview = PerspectiveViewport(main_surface)
 
-    game = Game(gameview, objects=playground)
+    game = Game(gameview, models=playground)
 
     pygame.display.flip()
 

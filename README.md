@@ -48,6 +48,13 @@ Creating your own custom viewport is rather simple. Simply extend `Viewport`,
 and override the relevant functions (most likely just `update_projection_matrix`
 and `to_view_coords`).
 
+Drawable objects should extend `GameObject` (c.f. `Cube` in `shapes.py`, or
+`EdgeCollection` from `edge_collection.py`).
+
+A wireframe model (classes extending `Model` from `model.py`) is simply a
+collection of edges, and represents that object in its own coordinate system
+with its own scale.
+
 
 Licensing
 ---------

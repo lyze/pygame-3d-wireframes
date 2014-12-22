@@ -4,9 +4,9 @@ import numpy as np
 
 from three_d.primitives import Edge
 
-from game_object import GameObject
+from three_d.model import Model
 
-class Cube(GameObject):
+class Cube(Model):
 
     def __init__(self, position, color=0xFFFFFF, side=17, **kwargs):
         s = side / 2.0

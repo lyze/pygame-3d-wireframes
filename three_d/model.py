@@ -1,26 +1,21 @@
-"""Contains the Model class"""
+"""Contains the interface for a game object model in our game world.
+"""
+from three_d.primitives import Wireframe
 
-from three_d.primitives import Entity3D
-
-class Model(Entity3D):
-    """Represents a wireframe mesh in its own coordinate system.
+class Model(Wireframe):
+    """Represents a wireframe model in the game world.
 
     Parameters
     ----------
-    edges : iterable of edges, optional
+    position : numpy array (of size 3)
     scale : float, optional
 
     Attributes
     ----------
-    edges : iterable of edges
+    position : numpy array
     scale : float
     """
-    def __init__(self, scale=1.0, edges=[]):
-        self.edges = edges
+    def __init__(self, position, scale=1.0, **kwargs):
+        super(Model, self).__init__(**kwargs)
+        self.position = position
         self.scale = scale
-
-    def add_edges(self, new_edges):
-        self.edges.extend(new_edges)
-
-    def __repr__(self):
-        return 'Model(scale={!r}, edges={!r})'.format(self.scale, self.edges)

@@ -38,7 +38,7 @@ class Viewport(object):
     up : numpy array, optional
         Defaults to (0, 1, 0).
     zoom : float, optional
-    objects : iterable of things to draw, optional
+    models : iterable of Model, optional
 
     Attributes
     ----------
@@ -55,13 +55,13 @@ class Viewport(object):
     strafe_dir
     zoom : float
     projection_matrix
-    objects : iterable of things to draw
+    models : iterable of Model
     """
     __metaclass__ = ABCMeta
 
     def __init__(self, surface, background_color=0x000000, eye=None,
                  center_offset=(0, 0), near=0, far=float('inf'), look_dir=None,
-                 up_dir=None, zoom=1.0, objects=None):
+                 up_dir=None, zoom=1.0, models=None):
         self._surface = surface
         self.background_color = background_color
         self.eye = eye if eye is not None else np.array([0.0, 0.0, 0.0])
@@ -74,7 +74,7 @@ class Viewport(object):
         self._up_dir /= np.linalg.norm(self._up_dir)
         self._strafe_dir = np.cross(self.look_dir, self.up_dir)
         self.zoom = zoom
-        self.objects = objects or []
+        self.models = models if models is not None else []
         self._projection_matrix = None
         self.update_projection_matrix()
 
@@ -85,12 +85,6 @@ class Viewport(object):
         """
         pass
 
-    def add_object(self, obj):
-        self.objects.append(obj)
-
-    def add_all_objects(self, objs):
-        self.objects.extend(objs)
-
     @timed
     def repaint(self):
         self.surface.fill(self.background_color)
@@ -98,7 +92,7 @@ class Viewport(object):
         world_to_camera = self.get_world_to_camera_matrix()
         transform = self.projection_matrix * world_to_camera
 
-        for obj in self.objects:
+        for obj in self.models:
             world_starts, world_ends = \
                 Viewport.get_world_endpoints(obj.edges, obj.position, obj.scale)
 

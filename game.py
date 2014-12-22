@@ -1,14 +1,22 @@
-'''Contains the controller.
-'''
+"""Contains the controller.
+"""
 import numpy as np
 
 class Game(object):
-    '''Manipulates the world (and its interactable objects) and the view.
-    '''
+    """Manipulates the world (and its interactable objects) and the view.
 
-    def __init__(self, view, objects=[]):
+    Parameters
+    ----------
+    view : Viewport
+    models : iterable of Model, optional
+
+    Attributes
+    ----------
+    view : Viewport
+    """
+    def __init__(self, view, models=None):
         self.view = view
-        self.view.add_all_objects(objects)
+        self.view.models.extend(models or [])
 
         self.is_moving_forward = False
         self.is_moving_backward = False

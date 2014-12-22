@@ -9,7 +9,7 @@ import numpy as np
 import re
 
 from three_d.primitives import Edge
-from edge_collection import EdgeCollection
+from three_d.model import Model
 
 class ShapeReader(object):
 
@@ -51,4 +51,4 @@ class ShapeReader(object):
                     continue
                 edges.append(Edge(start, end, color))
 
-            return EdgeCollection(np.array([0, 0, 0]), edges)
+            return Model(np.array([0, 0, 0]), edges)
