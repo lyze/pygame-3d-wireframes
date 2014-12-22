@@ -6,8 +6,10 @@ Introduction
 
 This sample project and library demonstrates basic rendering of wireframes in 3D
 in software only. No hardware acceleration is used. Currently, no z-buffering or
-clipping is performed. This may change if I decide to implement them (or if you
-decide to implement these features for your own edification).
+clipping is performed. This may change if either I decide to implement them, or,
+if _you_ decide to implement them, in which case you should open a pull request
+=). However, you can find a fast draft of the Liang-Barsky algorithm that I
+haven't tested in `mathutil.py`.
 
 This is a continuation of a final project for CIS 192 at the University of
 Pennsylvania. The primary purpose of this project is to be __educational__. This
@@ -29,8 +31,8 @@ This project does not rely on hardware 3D, so it should run on any system.
 Running the Sample Viewer
 -------------------------
 
-Simply running `python main.py` will launch a basic viewer, which can be
-interacted with `WASD` and the mouse.
+Simply running `python main.py` will launch a basic viewer, which uses `WASD`
+and mouse for basic interaction.
 
 Run `python main.py --help` for command-line usage options.
 
